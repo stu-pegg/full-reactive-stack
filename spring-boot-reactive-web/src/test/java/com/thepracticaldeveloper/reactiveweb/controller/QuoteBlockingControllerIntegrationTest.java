@@ -21,7 +21,9 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -89,5 +91,17 @@ public class QuoteBlockingControllerIntegrationTest {
         assertThat(receivedQuoteList.getBody()).isEqualTo(
                 Lists.newArrayList(new Quote("1", "mock-book", "Quote 1"),
                         new Quote("2", "mock-book", "Quote 2")));
+    }
+
+    @Test
+    public void deleteRequest() {
+        // given
+        String deleteQuoteId = "1";
+
+        // when
+        restTemplate.delete(serverBaseUrl + "/quote-blocking/{deleteQuoteId}", deleteQuoteId);
+
+        // then
+        then(quoteMongoBlockingRepository).should().deleteById(eq(deleteQuoteId));
     }
 }

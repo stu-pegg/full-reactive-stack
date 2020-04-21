@@ -12,13 +12,17 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.Duration;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 @RunWith(SpringRunner.class)
@@ -93,6 +97,23 @@ public class QuoteReactiveControllerIntegrationTest {
                 .expectComplete()
                 .verify();
 
+    }
+
+    @Test
+    public void deleteRequest() throws InterruptedException {
+        // given
+        String deleteQuoteId = "1";
+
+        // when
+        Mono<ClientResponse> result = webClient.delete().uri("/quote-reactive/{deleteQuoteId}", deleteQuoteId)
+                .exchange();
+
+        // then
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        then(quoteMongoReactiveRepository).should().deleteById(eq(deleteQuoteId));
     }
 
 }
